@@ -89,7 +89,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Quicksand',sans-se
 .dialogue-btn:active{transform:scale(.98)}
 
 /* SCREEN 5 - NIGHT SKY */
-#screen-5{background:linear-gradient(180deg,#0a0a2e 0%,#1a0a3e 40%,#0d0d35 100%);overflow:hidden}
+#screen-5{background:linear-gradient(180deg,#0a0a2e 0%,#1a0a3e 40%,#0d0d35 100%);overflow:hidden;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 16px 24px}
+#screen-5 .bottom-content{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:600px;z-index:10;flex-shrink:0}
 .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--dur) ease-in-out infinite;animation-delay:var(--delay)}
 @keyframes twinkle{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
 .moon{position:absolute;top:8%;right:12%;width:70px;height:70px;border-radius:50%;background:#ffe9a0;box-shadow:0 0 20px 6px rgba(255,233,160,.35),0 0 60px 20px rgba(255,233,160,.12);animation:moonFloat 6s ease-in-out infinite}
@@ -100,17 +101,17 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Quicksand',sans-se
 .cloud::before{width:60%;height:140%;top:-50%;left:20%}
 .cloud::after{width:40%;height:120%;top:-30%;left:55%}
 @keyframes drift{0%{transform:translateX(-250px)}100%{transform:translateX(calc(100vw + 250px))}}
-.shooting-star{position:absolute;width:4px;height:4px;background:#fff;border-radius:50%;opacity:0;animation:shoot var(--shoot-dur,1.2s) cubic-bezier(.25,.1,.25,1) forwards;will-change:transform,opacity}
+.shooting-star{position:absolute;width:4px;height:4px;background:#fff;border-radius:50%;opacity:0;animation:shoot var(--shoot-dur,1.2s) cubic-bezier(.25,.1,.25,1) forwards;will-change:transform,opacity;transform:rotate(var(--shoot-angle,30deg))}
 .shooting-star::after{content:'';position:absolute;top:50%;right:100%;width:120px;height:2px;background:linear-gradient(to left,rgba(255,255,255,.9),rgba(255,255,255,.4),transparent);transform:translateY(-50%);transform-origin:right center}
-@keyframes shoot{0%{opacity:0;transform:translate(0,0) scale(.5)}5%{opacity:1;transform:translate(-30px,18px) scale(1)}70%{opacity:.8}100%{opacity:0;transform:translate(-350px,210px) scale(.3)}}
-.rooftop-scene{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;height:220px}
+@keyframes shoot{0%{opacity:0;transform:rotate(var(--shoot-angle,30deg)) translate(0,0) scale(.5)}5%{opacity:1;transform:rotate(var(--shoot-angle,30deg)) translate(calc(var(--dx,-300px)),calc(var(--dy,180px))) scale(1)}70%{opacity:.8}100%{opacity:0;transform:rotate(var(--shoot-angle,30deg)) translate(calc(var(--dx,-300px)),calc(var(--dy,180px))) scale(.3)}}
+.rooftop-scene{width:100%;max-width:500px;height:180px;flex-shrink:0}
 .audio-toggle{position:fixed;top:16px;right:16px;z-index:200;width:44px;height:40px;background:rgba(30,10,60,.7);border:2px solid #ff69b4;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s}
 .audio-toggle:hover{background:rgba(60,20,90,.8);box-shadow:0 0 12px rgba(255,105,180,.4)}
 .audio-toggle.muted{opacity:.5}
-.play-again-btn{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:200;padding:14px 36px;background:linear-gradient(180deg,#2a1050,#1a0835);border:2px solid #ff69b4;border-radius:12px;color:#ffb6d9;font-family:'Press Start 2P',cursive;font-size:.8rem;cursor:pointer;letter-spacing:1px;transition:all .25s ease;box-shadow:0 0 20px rgba(255,105,180,.2)}
-.play-again-btn:hover{box-shadow:0 0 30px rgba(255,105,180,.5);transform:translateX(-50%) scale(1.05)}
-.play-again-btn:active{transform:translateX(-50%) scale(.97)}
-@media(max-width:480px){.welcome-heading{font-size:1rem}.dialogue-text{font-size:15px}.moon{width:50px;height:50px;top:5%;right:8%}.moon::after{width:46px;height:46px;top:-4px;left:12px}}
+.play-again-btn{padding:12px 32px;background:linear-gradient(180deg,#2a1050,#1a0835);border:2px solid #ff69b4;border-radius:12px;color:#ffb6d9;font-family:'Press Start 2P',cursive;font-size:.75rem;cursor:pointer;letter-spacing:1px;transition:all .25s ease;box-shadow:0 0 20px rgba(255,105,180,.2);flex-shrink:0}
+.play-again-btn:hover{box-shadow:0 0 30px rgba(255,105,180,.5);transform:scale(1.05)}
+.play-again-btn:active{transform:scale(.97)}
+@media(max-width:480px){.welcome-heading{font-size:1rem}.dialogue-text{font-size:15px}.moon{width:50px;height:50px;top:5%;right:8%}.moon::after{width:46px;height:46px;top:-4px;left:12px}.rooftop-scene{height:140px}#screen-5{padding-bottom:16px}}
 @media(max-height:600px){.maze-title{font-size:.8rem;margin-bottom:4px}.dpad-btn{width:44px;height:44px;font-size:1.2rem}.dpad-container{padding:6px 0 10px 0}.hint-text{display:none}}
 @media(min-width:768px){.dpad-container{display:none}.hint-text{display:block;color:#8866aa}}
 </style>
@@ -213,6 +214,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Quicksand',sans-se
   <div class="cloud" style="top:10%;width:110px;height:30px;--speed:48s;--delay:-32s"></div>
   <div class="cloud" style="top:30%;width:160px;height:38px;--speed:60s;--delay:-8s"></div>
   <div id="shooting-container"></div>
+  <div class="bottom-content">
   <div class="rooftop-scene">
     <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
       <rect x="120" y="170" width="360" height="50" rx="4" fill="#111130"/>
@@ -241,8 +243,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Quicksand',sans-se
       </g>
     </svg>
   </div>
-  <p style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);width:90%;max-width:500px;text-align:center;color:rgba(255,255,255,.55);font-family:'Quicksand',sans-serif;font-size:.95rem;line-height:1.7;letter-spacing:.3px;">Sorry if my behavior lately made things feel off. Thanks for sticking around. I'll do better.</p>
+  <p style="width:90%;max-width:500px;text-align:center;color:rgba(255,255,255,.55);font-family:'Quicksand',sans-serif;font-size:.9rem;line-height:1.7;letter-spacing:.3px;margin:0;">Sorry if my behavior lately made things feel off. Thanks for sticking around. I'll do better.</p>
   <button class="play-again-btn" onclick="showScreen(1)">Play Again 💕</button>
+  </div>
 </div>
 
 <script>
@@ -301,9 +304,12 @@ var shootingTimer=null;
 function spawnShootingStar(){
   var c=document.getElementById('shooting-container');var s=document.createElement('div');s.className='shooting-star';
   s.style.right=Math.random()*40+5+'%';s.style.top=Math.random()*35+5+'%';
+  var angle=30+Math.random()*15;
   s.style.setProperty('--shoot-dur',(1+Math.random()*.5)+'s');
+  s.style.setProperty('--shoot-angle',angle+'deg');
+  s.style.setProperty('--dx',(-250-Math.random()*150)+'px');
+  s.style.setProperty('--dy',(150+Math.random()*80)+'px');
   var uid='shoot-'+Date.now();s.classList.add(uid);
-  var st=document.createElement('style');st.textContent='.'+uid+'::after{transform:rotate('+(25+Math.random()*20)+'deg)}';document.head.appendChild(st);
   c.appendChild(s);setTimeout(function(){if(s.parentNode)s.remove();if(st.parentNode)st.remove()},2000);
 }
 function startShootingStars(){if(shootingTimer)return;scheduleNextShootingStar()}
@@ -326,7 +332,7 @@ function toggleAudio(){
 <script>
 (function(){
   'use strict';
-  var S=15,WP=1,WV=1,PV=0,GW=S*2+1,GH=S*2+1;
+  var S=11,WP=1,WV=1,PV=0,GW=S*2+1,GH=S*2+1;
   var maze=[],pp={r:1,c:1},dp={r:0,c:0},mc=0,gc=false,gc2=[];
   var ctr=document.getElementById('maze-container'),mcEl=document.getElementById('move-counter');
   var vo=document.getElementById('victory-overlay'),vb=document.getElementById('victory-btn');
@@ -378,12 +384,20 @@ function toggleAudio(){
     else if(e.key==='a'||e.key==='A')d='left';else if(e.key==='d'||e.key==='D')d='right';
     if(d)move(d)});
 
+  var dpadInterval=null,dpadDir=null;
+  function startDpad(dir){stopDpad();dpadDir=dir;move(dir);dpadInterval=setInterval(function(){move(dpadDir)},120)}
+  function stopDpad(){if(dpadInterval){clearInterval(dpadInterval);dpadInterval=null}dpadDir=null}
   document.querySelectorAll('.dpad-btn[data-dir]').forEach(function(b){
     var d=b.getAttribute('data-dir');
-    b.addEventListener('touchstart',function(e){e.preventDefault();move(d)},{passive:false});
-    b.addEventListener('click',function(e){e.preventDefault();move(d)});
+    b.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();startDpad(d)},{passive:false});
+    b.addEventListener('touchend',function(e){e.preventDefault();stopDpad()},{passive:false});
+    b.addEventListener('touchcancel',function(e){stopDpad()});
+    b.addEventListener('mousedown',function(e){e.preventDefault();startDpad(d)});
+    b.addEventListener('mouseup',function(e){stopDpad()});
+    b.addEventListener('mouseleave',function(e){stopDpad()});
+    b.addEventListener('click',function(e){e.preventDefault()});
   });
-  document.getElementById('dpad-container').addEventListener('touchend',function(e){e.preventDefault()},{passive:false});
+  document.getElementById('dpad-container').addEventListener('touchend',function(e){e.preventDefault();stopDpad()},{passive:false});
 
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(render,200)});
 
