@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>💕 Romantic Maze Game 💕</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:#fff;color:#333}
+.screen{position:fixed;top:0;left:0;width:100%;height:100%;display:none;z-index:1}
+.screen.active{display:flex}
+
+/* SCREEN 1 - WELCOME */
+#screen-1{background:#f9f5f0;background-image:radial-gradient(ellipse at 20% 50%,rgba(255,182,193,.15) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(147,112,219,.1) 0%,transparent 50%);flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.welcome-container{text-align:center;max-width:420px;width:100%;animation:fadeInUp .8s ease}
+.welcome-illustration{margin-bottom:20px}
+.welcome-illustration svg{width:200px;height:180px}
+.welcome-heading{font-family:'Press Start 2P',cursive;font-size:1.3rem;color:#ff69b4;text-shadow:2px 2px 0 #ffb6c1;margin-bottom:12px;line-height:1.6}
+.welcome-subheading{font-size:1.1rem;color:#9370db;font-weight:600;margin-bottom:32px}
+.welcome-buttons{display:flex;flex-direction:column;gap:14px;align-items:center}
+.btn-yes{padding:14px 32px;background:linear-gradient(135deg,#ff69b4,#ff1493);color:#fff;border:none;border-radius:30px;font-family:'Quicksand',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(255,105,180,.4);transition:transform .2s,box-shadow .2s}
+.btn-yes:hover{transform:scale(1.05);box-shadow:0 6px 25px rgba(255,105,180,.6)}
+.btn-no{padding:10px 24px;background:#eee;color:#888;border:2px solid #ddd;border-radius:20px;font-family:'Quicksand',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;position:relative}
+.btn-no:hover{animation:shake .4s ease}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-12px) rotate(-2deg)}40%{transform:translateX(10px) rotate(2deg)}60%{transform:translateX(-8px) rotate(-1deg)}80%{transform:translateX(6px) rotate(1deg)}}
+
+/* SCREEN 2 - MODAL */
+#screen-2{background:rgba(10,10,46,.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px}
+.modal-box{background:linear-gradient(180deg,#fff,#fdf2f8);border:3px dashed #ff69b4;border-radius:20px;padding:32px 28px;max-width:440px;width:100%;position:relative;text-align:center;box-shadow:0 0 40px rgba(255,105,180,.2);animation:modalBounce .5s cubic-bezier(.22,1,.36,1)}
+.modal-heart{position:absolute;font-size:1.4rem}
+.modal-heart.tl{top:10px;left:14px}.modal-heart.tr{top:10px;right:14px}.modal-heart.bl{bottom:10px;left:14px}.modal-heart.br{bottom:10px;right:14px}
+.modal-title{font-family:'Press Start 2P',cursive;font-size:.95rem;color:#ff69b4;margin-bottom:16px}
+.modal-body{font-size:.95rem;color:#555;line-height:1.7;margin-bottom:24px}
+.btn-start{padding:14px 36px;background:linear-gradient(135deg,#ff69b4,#ff1493);color:#fff;border:none;border-radius:30px;font-family:'Quicksand',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(255,105,180,.4);transition:transform .2s,box-shadow .2s}
+.btn-start:hover{transform:scale(1.05);box-shadow:0 6px 25px rgba(255,105,180,.6)}
+@keyframes modalBounce{0%{opacity:0;transform:scale(.7) translateY(40px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+
+/* SCREEN 3 - MAZE */
+#screen-3{background:#2D1B69;flex-direction:column;align-items:center;justify-content:center}
+.maze-title{font-family:'Press Start 2P',cursive;font-size:1.1rem;color:#FF69B4;text-shadow:0 0 10px #FF69B4,0 0 20px #FF69B488;margin-bottom:10px;letter-spacing:2px}
+.maze-wrapper{position:relative;display:flex;align-items:center;justify-content:center;flex:1;width:100%;max-width:600px;padding:8px}
+#maze-container{position:relative;background:#1a0f3d;border:3px solid #FF69B4;box-shadow:0 0 15px #FF69B466,inset 0 0 15px #FF69B422}
+.maze-grid{display:grid;width:100%;height:100%}
+.maze-cell{position:relative;transition:background .1s}
+.maze-cell.wall{background:#FF69B4;box-shadow:inset 0 0 3px #FFaaaa}
+.maze-cell.path{background:#1a0f3d}
+.maze-cell.player-cell{background:#3d2a8a;box-shadow:inset 0 0 8px #FFD700,0 0 12px #FFD70088}
+.maze-cell.destination-cell{background:#3d1a1a}
+.maze-cell.visited{background:#2a1860}
+.player-marker,.destination-marker{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.2rem;z-index:10;pointer-events:none;line-height:1}
+.player-marker{filter:drop-shadow(0 0 4px #FFD700)}
+.destination-marker{animation:pulse-rose 1.2s ease-in-out infinite}
+@keyframes pulse-rose{0%,100%{transform:translate(-50%,-50%) scale(1);filter:drop-shadow(0 0 4px #ff4466)}50%{transform:translate(-50%,-50%) scale(1.3);filter:drop-shadow(0 0 10px #ff4466) drop-shadow(0 0 20px #ff668888)}}
+.victory-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(45,27,105,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:100;animation:fadeIn .5s ease}
+.victory-overlay.show{display:flex}
+.victory-text{font-family:'Press Start 2P',cursive;font-size:1.1rem;color:#FF69B4;text-shadow:0 0 20px #FF69B4;margin-bottom:8px;text-align:center;animation:bounceIn .6s ease}
+.victory-sub{font-size:.9rem;color:#dda0dd;margin-bottom:20px;text-align:center}
+.victory-btn{background:#FF69B4;color:#fff;border:none;padding:12px 28px;font-size:1rem;font-family:'Press Start 2P',cursive;cursor:pointer;border-radius:4px;box-shadow:0 0 12px #FF69B488;transition:transform .1s,box-shadow .1s}
+.victory-btn:hover{transform:scale(1.05);box-shadow:0 0 20px #FF69B4aa}
+.move-counter{font-family:'Press Start 2P',cursive;font-size:.7rem;color:#dda0dd;margin-top:6px}
+.dpad-container{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 20px 0;flex-shrink:0}
+.dpad-row{display:flex;gap:4px}
+.dpad-btn{width:56px;height:56px;background:#3d2a8a;border:2px solid #FF69B4;color:#FF69B4;font-size:1.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:6px;user-select:none;touch-action:manipulation;transition:background .08s,transform .08s;box-shadow:0 2px 6px #00000044}
+.dpad-btn:active{background:#FF69B4;color:#2D1B69;transform:scale(.92)}
+.dpad-btn.spacer{visibility:hidden;border:none;background:transparent;box-shadow:none}
+.hint-text{font-size:.7rem;color:#8866aa;text-align:center;padding-bottom:8px;flex-shrink:0}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.1)}70%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
+
+/* SCREEN 4 - DIALOGUE */
+#screen-4{background:rgba(10,10,46,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;z-index:100}
+.dialogue-container{position:relative;width:90%;max-width:520px;min-height:260px}
+.dialogue-box{position:absolute;top:0;left:0;width:100%;background:linear-gradient(180deg,#1a1a4e,#12123a);border:3px solid #ff69b4;border-radius:16px;padding:28px 24px 24px;box-shadow:0 0 20px rgba(255,105,180,.3),inset 0 0 30px rgba(255,105,180,.05);opacity:0;transform:translateY(60px);pointer-events:none}
+.dialogue-box.visible{animation:slideUp .6s cubic-bezier(.22,1,.36,1) forwards;pointer-events:auto}
+.dialogue-box.hiding{animation:slideDown .4s ease-in forwards;pointer-events:none}
+@keyframes slideUp{0%{opacity:0;transform:translateY(60px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
+.dialogue-profile{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#ff69b4,#ff1493);display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid #ff85c8;box-shadow:0 0 12px rgba(255,105,180,.5);flex-shrink:0}
+.profile-name{color:#ffb6d9;font-size:15px;font-weight:bold}
+.dialogue-text{color:#e8e0f0;font-size:17px;line-height:1.6;margin-bottom:20px;min-height:52px;overflow:hidden}
+.dialogue-text .typing-cursor{display:inline-block;width:2px;height:1em;background:#ff69b4;margin-left:2px;animation:blink .7s step-end infinite;vertical-align:text-bottom}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.dialogue-btn{display:block;width:100%;padding:12px;border:2px solid #ff69b4;border-radius:10px;background:linear-gradient(180deg,#2a1a4e,#1a0a3e);color:#ffb6d9;font-family:'Quicksand',sans-serif;font-size:16px;font-weight:bold;cursor:pointer;transition:all .25s ease;letter-spacing:1px}
+.dialogue-btn:hover{background:linear-gradient(180deg,#3a2a5e,#2a1a4e);box-shadow:0 0 16px rgba(255,105,180,.4);transform:scale(1.02)}
+.dialogue-btn:active{transform:scale(.98)}
+
+/* SCREEN 5 - NIGHT SKY */
+#screen-5{background:linear-gradient(180deg,#0a0a2e 0%,#1a0a3e 40%,#0d0d35 100%);overflow:hidden}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--dur) ease-in-out infinite;animation-delay:var(--delay)}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+.moon{position:absolute;top:8%;right:12%;width:70px;height:70px;border-radius:50%;background:#ffe9a0;box-shadow:0 0 20px 6px rgba(255,233,160,.35),0 0 60px 20px rgba(255,233,160,.12);animation:moonFloat 6s ease-in-out infinite}
+.moon::after{content:'';position:absolute;top:-6px;left:16px;width:64px;height:64px;border-radius:50%;background:#0d0d35}
+@keyframes moonFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.cloud{position:absolute;background:rgba(180,180,220,.08);border-radius:50px;animation:drift var(--speed) linear infinite;animation-delay:var(--delay)}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%}
+.cloud::before{width:60%;height:140%;top:-50%;left:20%}
+.cloud::after{width:40%;height:120%;top:-30%;left:55%}
+@keyframes drift{0%{transform:translateX(-250px)}100%{transform:translateX(calc(100vw + 250px))}}
+.shooting-star{position:absolute;width:3px;height:3px;background:#fff;border-radius:50%;opacity:0;animation:shoot 1.2s linear forwards}
+.shooting-star::after{content:'';position:absolute;top:0;right:0;width:80px;height:1.5px;background:linear-gradient(to left,rgba(255,255,255,.8),transparent)}
+@keyframes shoot{0%{opacity:1;transform:translate(0,0)}70%{opacity:1}100%{opacity:0;transform:translate(-300px,180px)}}
+.rooftop-scene{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;height:220px}
+.audio-toggle{position:fixed;top:16px;right:16px;z-index:200;width:44px;height:40px;background:rgba(30,10,60,.7);border:2px solid #ff69b4;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s}
+.audio-toggle:hover{background:rgba(60,20,90,.8);box-shadow:0 0 12px rgba(255,105,180,.4)}
+.audio-toggle.muted{opacity:.5}
+.play-again-btn{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:200;padding:14px 36px;background:linear-gradient(180deg,#2a1050,#1a0835);border:2px solid #ff69b4;border-radius:12px;color:#ffb6d9;font-family:'Press Start 2P',cursive;font-size:.8rem;cursor:pointer;letter-spacing:1px;transition:all .25s ease;box-shadow:0 0 20px rgba(255,105,180,.2)}
+.play-again-btn:hover{box-shadow:0 0 30px rgba(255,105,180,.5);transform:translateX(-50%) scale(1.05)}
+.play-again-btn:active{transform:translateX(-50%) scale(.97)}
+@media(max-width:480px){.welcome-heading{font-size:1rem}.dialogue-text{font-size:15px}.moon{width:50px;height:50px;top:5%;right:8%}.moon::after{width:46px;height:46px;top:-4px;left:12px}}
+@media(max-height:600px){.maze-title{font-size:.8rem;margin-bottom:4px}.dpad-btn{width:44px;height:44px;font-size:1.2rem}.dpad-container{padding:6px 0 10px 0}.hint-text{display:none}}
+@media(min-width:768px){.dpad-container{display:none}.hint-text{display:block;color:#8866aa}}
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: WELCOME -->
+<div id="screen-1" class="screen active">
+  <div class="welcome-container">
+    <div class="welcome-illustration">
+      <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(100,35)"><path d="M0,-18 C-5,-30 -25,-30 -25,-15 C-25,0 0,18 0,25 C0,18 25,0 25,-15 C25,-30 5,-30 0,-18Z" fill="#ff69b4" filter="drop-shadow(0 2px 6px rgba(255,105,180,.5))"/></g>
+        <g transform="translate(55,75)">
+          <ellipse cx="25" cy="55" rx="22" ry="18" fill="#ffb6c1"/><circle cx="25" cy="32" r="15" fill="#ffb6c1"/>
+          <polygon points="13,22 8,4 22,18" fill="#ffb6c1"/><polygon points="37,22 42,4 28,18" fill="#ffb6c1"/>
+          <polygon points="14,21 10,8 21,18" fill="#ff85c8"/><polygon points="36,21 40,8 29,18" fill="#ff85c8"/>
+          <ellipse cx="19" cy="30" rx="3" ry="3.5" fill="#333"/><ellipse cx="31" cy="30" rx="3" ry="3.5" fill="#333"/>
+          <circle cx="20" cy="29" r="1.2" fill="#fff"/><circle cx="32" cy="29" r="1.2" fill="#fff"/>
+          <ellipse cx="25" cy="35" rx="2" ry="1.5" fill="#ff69b4"/>
+          <path d="M47,58 Q62,50 58,35 Q56,28 52,32" stroke="#ffb6c1" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </g>
+        <g transform="translate(105,78)">
+          <ellipse cx="25" cy="52" rx="22" ry="18" fill="#c8b6e2"/><circle cx="25" cy="30" r="15" fill="#c8b6e2"/>
+          <polygon points="13,20 8,2 22,16" fill="#c8b6e2"/><polygon points="37,20 42,2 28,16" fill="#c8b6e2"/>
+          <polygon points="14,19 10,6 21,16" fill="#d4a0e8"/><polygon points="36,19 40,6 29,16" fill="#d4a0e8"/>
+          <ellipse cx="19" cy="28" rx="3" ry="3.5" fill="#333"/><ellipse cx="31" cy="28" rx="3" ry="3.5" fill="#333"/>
+          <circle cx="20" cy="27" r="1.2" fill="#fff"/><circle cx="32" cy="27" r="1.2" fill="#fff"/>
+          <ellipse cx="25" cy="33" rx="2" ry="1.5" fill="#ff69b4"/>
+          <path d="M3,55 Q-12,48 -8,32 Q-6,25 -2,29" stroke="#c8b6e2" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </g>
+        <text x="80" y="70" font-size="14" fill="#ff69b4" opacity=".7">💕</text>
+        <text x="120" y="65" font-size="10" fill="#ff69b4" opacity=".5">💗</text>
+      </svg>
+    </div>
+    <h1 class="welcome-heading">Hello My Baby!</h1>
+    <p class="welcome-subheading">Do you want to play a game?</p>
+    <div class="welcome-buttons">
+      <button class="btn-yes" onclick="showScreen(2)">Yes! I want to play, baby 💕</button>
+      <button class="btn-no" id="btn-no" onmouseenter="runAway()" onclick="runAway()">No! I don't want to play</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: GAME DETAILS -->
+<div id="screen-2" class="screen">
+  <div class="modal-box">
+    <span class="modal-heart tl">💕</span><span class="modal-heart tr">💕</span>
+    <span class="modal-heart bl">💕</span><span class="modal-heart br">💕</span>
+    <h2 class="modal-title">Game Details 💕</h2>
+    <p class="modal-body">You will play a cute maze game.<br>Reach the end to get your reward!<br><br><strong>Reward:</strong> A sweet kiss 💋<br><br><strong>How to Play:</strong><br>Use the arrow keys or swipe on mobile<br>to move through the maze and reach the exit.</p>
+    <button class="btn-start" onclick="showScreen(3)">Start Game 💗</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: MAZE -->
+<div id="screen-3" class="screen">
+  <div class="maze-title">✦ Find Your Way ✦</div>
+  <div class="maze-wrapper">
+    <div id="maze-container">
+      <div class="victory-overlay" id="victory-overlay">
+        <div class="victory-text">💕 You Found Her! 💕</div>
+        <div class="victory-sub">The maze cannot keep true hearts apart</div>
+        <button class="victory-btn" id="victory-btn">Continue 💕</button>
+      </div>
+    </div>
+  </div>
+  <div class="move-counter" id="move-counter">Steps: 0</div>
+  <div class="dpad-container" id="dpad-container">
+    <div class="dpad-row"><div class="dpad-btn spacer"></div><div class="dpad-btn" data-dir="up">▲</div><div class="dpad-btn spacer"></div></div>
+    <div class="dpad-row"><div class="dpad-btn" data-dir="left">◀</div><div class="dpad-btn spacer"></div><div class="dpad-btn" data-dir="right">▶</div></div>
+    <div class="dpad-row"><div class="dpad-btn spacer"></div><div class="dpad-btn" data-dir="down">▼</div><div class="dpad-btn spacer"></div></div>
+  </div>
+  <div class="hint-text">Use arrow keys or WASD to move</div>
+</div>
+
+<!-- SCREEN 4: DIALOGUE -->
+<div id="screen-4" class="screen">
+  <div class="dialogue-container">
+    <div id="dialogue-1" class="dialogue-box visible">
+      <div class="dialogue-profile"><div class="profile-avatar">💕</div><span class="profile-name">Jeyrapah ❤️</span></div>
+      <div class="dialogue-text" id="text-1"></div>
+      <button class="dialogue-btn" onclick="nextDialogue()">Next ➡️</button>
+    </div>
+    <div id="dialogue-2" class="dialogue-box">
+      <div class="dialogue-profile"><div class="profile-avatar">💕</div><span class="profile-name">Jeyrapah ❤️</span></div>
+      <div class="dialogue-text" id="text-2"></div>
+      <button class="dialogue-btn" onclick="showScreen(5)">Continue 💕</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 5: NIGHT SKY -->
+<div id="screen-5" class="screen">
+  <audio id="bgm" loop><source src="losing-us-raissanggiani.mp3" type="audio/mpeg"></audio>
+  <button class="audio-toggle" id="audioToggle" onclick="toggleAudio()" title="Toggle Music">🎵</button>
+  <div class="moon"></div>
+  <div id="stars-container"></div>
+  <div class="cloud" style="top:14%;width:140px;height:36px;--speed:42s;--delay:0s"></div>
+  <div class="cloud" style="top:22%;width:180px;height:42px;--speed:55s;--delay:-18s"></div>
+  <div class="cloud" style="top:10%;width:110px;height:30px;--speed:48s;--delay:-32s"></div>
+  <div class="cloud" style="top:30%;width:160px;height:38px;--speed:60s;--delay:-8s"></div>
+  <div id="shooting-container"></div>
+  <div class="rooftop-scene">
+    <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+      <rect x="120" y="170" width="360" height="50" rx="4" fill="#111130"/>
+      <rect x="100" y="165" width="400" height="12" rx="3" fill="#181848"/>
+      <rect x="420" y="130" width="24" height="35" fill="#111130"/>
+      <rect x="416" y="126" width="32" height="8" rx="2" fill="#181848"/>
+      <g transform="translate(200,60)">
+        <ellipse cx="30" cy="105" rx="22" ry="18" fill="#0a0a1e"/><circle cx="30" cy="78" r="16" fill="#0a0a1e"/>
+        <polygon points="18,66 14,46 26,62" fill="#0a0a1e"/><polygon points="42,66 46,46 34,62" fill="#0a0a1e"/>
+        <polygon points="19,65 16,50 25,63" fill="#1a0a2e"/><polygon points="41,65 44,50 35,63" fill="#1a0a2e"/>
+        <ellipse cx="24" cy="74" rx="3.5" ry="4" fill="#ffe066"/><circle cx="23" cy="72.5" r="2" fill="#0a0a1e"/>
+        <ellipse cx="36" cy="74" rx="3.5" ry="4" fill="#ffe066"/><circle cx="35" cy="72.5" r="2" fill="#0a0a1e"/>
+        <circle cx="25" cy="73" r="1" fill="#fff" opacity=".7"/><circle cx="37" cy="73" r="1" fill="#fff" opacity=".7"/>
+        <ellipse cx="30" cy="80" rx="2" ry="1.5" fill="#ff8fa0"/>
+        <path d="M52,108 Q70,100 65,80 Q62,70 58,74" stroke="#0a0a1e" stroke-width="5" fill="none" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(320,62)">
+        <ellipse cx="30" cy="103" rx="22" ry="18" fill="#c8c8e0"/><circle cx="30" cy="76" r="16" fill="#c8c8e0"/>
+        <polygon points="18,64 14,44 26,60" fill="#c8c8e0"/><polygon points="42,64 46,44 34,60" fill="#c8c8e0"/>
+        <polygon points="19,63 16,48 25,61" fill="#e0b0c0"/><polygon points="41,63 44,48 35,61" fill="#e0b0c0"/>
+        <ellipse cx="24" cy="72" rx="3.5" ry="4" fill="#ffe066"/><circle cx="23" cy="70.5" r="2" fill="#1a1a3e"/>
+        <ellipse cx="36" cy="72" rx="3.5" ry="4" fill="#ffe066"/><circle cx="35" cy="70.5" r="2" fill="#1a1a3e"/>
+        <circle cx="25" cy="71" r="1" fill="#fff" opacity=".8"/><circle cx="37" cy="71" r="1" fill="#fff" opacity=".8"/>
+        <ellipse cx="30" cy="78" rx="2" ry="1.5" fill="#ff8fa0"/>
+        <path d="M8,106 Q-12,96 -6,78 Q-3,68 2,72" stroke="#c8c8e0" stroke-width="5" fill="none" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
+  <button class="play-again-btn" onclick="showScreen(1)">Play Again 💕</button>
+</div>
+
+<script>
+/* ===== GLOBAL ===== */
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  var t=document.getElementById('screen-'+n);
+  if(t)t.classList.add('active');
+  if(n===5){startNightSky();playMusic()}
+  if(n===3){setTimeout(function(){if(window.mazeAPI)window.mazeAPI.reset()},100)}
+}
+
+/* ===== WELCOME: NO BUTTON ===== */
+function runAway(){
+  var btn=document.getElementById('btn-no');
+  btn.style.position='fixed';
+  btn.style.left=Math.random()*(window.innerWidth-180)+'px';
+  btn.style.top=Math.random()*(window.innerHeight-60)+'px';
+}
+
+/* ===== MAZE CALLBACK ===== */
+window.onMazeComplete=function(){
+  showScreen(4);currentDialogue=0;
+  document.getElementById('dialogue-1').className='dialogue-box visible';
+  document.getElementById('dialogue-2').className='dialogue-box';
+  setTimeout(function(){typeText('text-1',dialogueTexts[0],45)},500);
+};
+
+/* ===== DIALOGUE SYSTEM ===== */
+var dialogueTexts=["Yay! You did it so easy huh 💕","Muuuahh!!! I love youuuu sooooooooo muchhhhhh!!!!!!! 💋❤️"];
+var currentDialogue=0;
+function nextDialogue(){
+  var cur=document.getElementById('dialogue-'+(currentDialogue+1));
+  cur.classList.remove('visible');cur.classList.add('hiding');
+  currentDialogue++;
+  var nxt=document.getElementById('dialogue-'+(currentDialogue+1));
+  setTimeout(function(){nxt.classList.add('visible');typeText('text-'+(currentDialogue+1),dialogueTexts[currentDialogue],40)},450);
+}
+function typeText(id,text,speed){
+  var el=document.getElementById(id);el.innerHTML='';var i=0;
+  var cursor=document.createElement('span');cursor.className='typing-cursor';
+  function type(){if(i<text.length){el.textContent=text.substring(0,i+1);el.appendChild(cursor);i++;setTimeout(type,speed)}else{setTimeout(function(){if(cursor.parentNode)cursor.remove()},800)}}
+  type();
+}
+
+/* ===== NIGHT SKY: STARS ===== */
+var starsCreated=false;
+function createStars(){
+  if(starsCreated)return;starsCreated=true;
+  var c=document.getElementById('stars-container');
+  for(var i=0;i<90;i++){var s=document.createElement('div');s.className='star';var sz=Math.random()*3+1;s.style.width=sz+'px';s.style.height=sz+'px';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*70+'%';s.style.setProperty('--dur',(2+Math.random()*4)+'s');s.style.setProperty('--delay',(Math.random()*5)+'s');c.appendChild(s)}
+}
+
+/* ===== NIGHT SKY: SHOOTING STARS ===== */
+var shootingTimer=null;
+function spawnShootingStar(){
+  var c=document.getElementById('shooting-container');var s=document.createElement('div');s.className='shooting-star';
+  s.style.right=Math.random()*40+5+'%';s.style.top=Math.random()*35+5+'%';
+  var uid='shoot-'+Date.now();s.classList.add(uid);
+  var st=document.createElement('style');st.textContent='.'+uid+'::after{transform:rotate('+(25+Math.random()*20)+'deg)}';document.head.appendChild(st);
+  c.appendChild(s);setTimeout(function(){if(s.parentNode)s.remove();if(st.parentNode)st.remove()},2000);
+}
+function startShootingStars(){if(shootingTimer)return;scheduleNextShootingStar()}
+function scheduleNextShootingStar(){shootingTimer=setTimeout(function(){spawnShootingStar();scheduleNextShootingStar()},3000+Math.random()*5000)}
+function startNightSky(){createStars();startShootingStars()}
+
+/* ===== AUDIO ===== */
+var audioPlaying=false;
+function playMusic(){
+  var b=document.getElementById('bgm');b.volume=.5;
+  b.play().then(function(){audioPlaying=true;document.getElementById('audioToggle').textContent='🎵';document.getElementById('audioToggle').classList.remove('muted')}).catch(function(){audioPlaying=false;document.getElementById('audioToggle').textContent='🔇';document.getElementById('audioToggle').classList.add('muted')})
+}
+function toggleAudio(){
+  var b=document.getElementById('bgm'),btn=document.getElementById('audioToggle');
+  if(audioPlaying){b.pause();audioPlaying=false;btn.textContent='🔇';btn.classList.add('muted')}else{b.play();audioPlaying=true;btn.textContent='🎵';btn.classList.remove('muted')}
+}
+</script>
+
+<!-- MAZE ENGINE -->
+<script>
+(function(){
+  'use strict';
+  var S=15,WP=1,WV=1,PV=0,GW=S*2+1,GH=S*2+1;
+  var maze=[],pp={r:1,c:1},dp={r:0,c:0},mc=0,gc=false,gc2=[];
+  var ctr=document.getElementById('maze-container'),mcEl=document.getElementById('move-counter');
+  var vo=document.getElementById('victory-overlay'),vb=document.getElementById('victory-btn');
+
+  function initGrid(){maze=[];for(var r=0;r<GH;r++){maze[r]=[];for(var c=0;c<GW;c++)maze[r][c]=WV}}
+  function shuf(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+  function carve(r,c){
+    maze[r][c]=PV;var dirs=[{dr:-2,dc:0},{dr:0,dc:2},{dr:2,dc:0},{dr:0,dc:-2}];shuf(dirs);
+    for(var i=0;i<dirs.length;i++){var nr=r+dirs[i].dr,nc=c+dirs[i].dc;
+      if(nr>=0&&nr<GH&&nc>=0&&nc<GW&&maze[nr][nc]===WV){maze[r+dirs[i].dr/2][c+dirs[i].dc/2]=PV;carve(nr,nc)}}
+  }
+  function genMaze(){initGrid();carve(1,1);return maze}
+  function cellPx(){var mw=window.innerWidth-24,mh=window.innerHeight*.55;return Math.max(14,Math.floor(Math.min(mw,mh,540)/GW))}
+
+  function render(){
+    ctr.innerHTML='';gc2=[];var px=cellPx();
+    ctr.style.width=(GW*px)+'px';ctr.style.height=(GH*px)+'px';
+    var g=document.createElement('div');g.className='maze-grid';
+    g.style.gridTemplateColumns='repeat('+GW+','+px+'px)';
+    g.style.gridTemplateRows='repeat('+GH+','+px+'px)';
+    ctr.appendChild(g);
+    for(var r=0;r<GH;r++){gc2[r]=[];for(var c=0;c<GW;c++){var cl=document.createElement('div');cl.className='maze-cell '+(maze[r][c]===WV?'wall':'path');cl.style.width=px+'px';cl.style.height=px+'px';g.appendChild(cl);gc2[r][c]=cl}}
+    placeDest(px);placePlayer(px);updHL();
+    var v=document.createElement('div');v.className='victory-overlay';v.id='victory-overlay';
+    v.innerHTML='<div class="victory-text">💕 You Found Her! 💕</div><div class="victory-sub">The maze cannot keep true hearts apart</div><button class="victory-btn" id="victory-btn">Continue 💕</button>';
+    ctr.appendChild(v);vo=document.getElementById('victory-overlay');vb=document.getElementById('victory-btn');
+    vb.addEventListener('click',function(){initGame()});
+  }
+  function placeDest(px){var o=ctr.querySelector('.destination-marker');if(o)o.remove();var m=document.createElement('div');m.className='destination-marker';m.textContent='🌹';m.id='dest-marker';m.style.width=px+'px';m.style.height=px+'px';m.style.left=(dp.c*px)+'px';m.style.top=(dp.r*px)+'px';ctr.appendChild(m)}
+  function placePlayer(px){var o=ctr.querySelector('.player-marker');if(o)o.remove();var m=document.createElement('div');m.className='player-marker';m.textContent='👧';m.id='player-marker';m.style.width=px+'px';m.style.height=px+'px';m.style.left=(pp.c*px)+'px';m.style.top=(pp.r*px)+'px';ctr.appendChild(m)}
+  function updHL(){document.querySelectorAll('.player-cell').forEach(function(e){e.classList.remove('player-cell')});document.querySelectorAll('.destination-cell').forEach(function(e){e.classList.remove('destination-cell')});if(gc2[pp.r]&&gc2[pp.r][pp.c])gc2[pp.r][pp.c].classList.add('player-cell');if(gc2[dp.r]&&gc2[dp.r][dp.c])gc2[dp.r][dp.c].classList.add('destination-cell')}
+  function updPos(){var m=document.getElementById('player-marker');if(!m)return;var px=cellPx();m.style.left=(pp.c*px)+'px';m.style.top=(pp.r*px)+'px';updHL()}
+  function markVis(r,c){if(gc2[r]&&gc2[r][c])gc2[r][c].classList.add('visited')}
+  function walkable(r,c){if(r<0||r>=GH||c<0||c>=GW)return false;return maze[r][c]===PV}
+
+  function move(dir){
+    if(gc)return;var nr=pp.r,nc=pp.c;
+    if(dir==='up')nr--;else if(dir==='down')nr++;else if(dir==='left')nc--;else if(dir==='right')nc++;
+    if(!walkable(nr,nc))return;
+    markVis(pp.r,pp.c);pp.r=nr;pp.c=nc;mc++;updPos();mcEl.textContent='Steps: '+mc;
+    if(pp.r===dp.r&&pp.c===dp.c)victory();
+  }
+  function victory(){gc=true;vo.classList.add('show');if(typeof window.onMazeComplete==='function')window.onMazeComplete()}
+
+  document.addEventListener('keydown',function(e){var d=null;
+    if(e.key==='ArrowUp'){d='up';e.preventDefault()}else if(e.key==='ArrowDown'){d='down';e.preventDefault()}
+    else if(e.key==='ArrowLeft'){d='left';e.preventDefault()}else if(e.key==='ArrowRight'){d='right';e.preventDefault()}
+    else if(e.key==='w'||e.key==='W')d='up';else if(e.key==='s'||e.key==='S')d='down'
+    else if(e.key==='a'||e.key==='A')d='left';else if(e.key==='d'||e.key==='D')d='right';
+    if(d)move(d)});
+
+  document.querySelectorAll('.dpad-btn[data-dir]').forEach(function(b){
+    var d=b.getAttribute('data-dir');
+    b.addEventListener('touchstart',function(e){e.preventDefault();move(d)},{passive:false});
+    b.addEventListener('click',function(e){e.preventDefault();move(d)});
+  });
+  document.getElementById('dpad-container').addEventListener('touchend',function(e){e.preventDefault()},{passive:false});
+
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(render,200)});
+
+  function initGame(){gc=false;mc=0;mcEl.textContent='Steps: 0';vo.classList.remove('show');genMaze();pp={r:1,c:1};dp={r:GH-2,c:GW-2};maze[dp.r][dp.c]=PV;render()}
+  initGame();
+
+  window.mazeAPI={reset:function(){initGame()},getState:function(){return{maze:maze.map(function(r){return r.slice()}),playerPos:pp,destPos:dp,moveCount:mc,complete:gc,size:{rows:GH,cols:GW}}},move:function(d){move(d)},getMaze:function(){return maze}};
+  if(typeof window.onMazeComplete!=='function')window.onMazeComplete=function(){console.log('[Maze] Done! Steps:',mc)};
+})();
+</script>
+</body>
+</html>
